@@ -8,6 +8,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.util.stream.Stream;
 
 import static de.heil_privat.keepasstool.ApplicationModel.Settting.LAST_KEEPASSFILE;
 
@@ -79,14 +80,19 @@ public class OpenDatabaseDialog extends JDialog {
         gc.weighty = 0.0;
         add(okCancel, gc);
 
-        passwordField.addKeyListener(new KeyAdapter() {
+        Stream.of(databaseFile, selectFile, passwordField, ok).forEach(c -> c.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
-                if (e.getKeyChar() == KeyEvent.VK_ENTER) {
-                    openFile();
+                switch(e.getKeyChar()) {
+                    case KeyEvent.VK_ENTER:
+                        openFile();
+                        break;
+                    case KeyEvent.VK_ESCAPE:
+                        dispose();
+                        break;
                 }
             }
-        });
+        }));
 
         addWindowListener(new WindowAdapter() {
             @Override
