@@ -91,7 +91,11 @@ public class OpenDatabaseDialog extends JDialog {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowOpened(WindowEvent e) {
-                passwordField.requestFocusInWindow();
+                if(databaseFile.getText().isEmpty()) {
+                    databaseFile.requestFocusInWindow();
+                } else {
+                    passwordField.requestFocusInWindow();
+                }
             }
         });
 

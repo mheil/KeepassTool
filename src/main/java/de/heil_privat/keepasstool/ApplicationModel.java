@@ -6,10 +6,7 @@ import org.linguafranca.pwdb.kdbx.KdbxCreds;
 import org.linguafranca.pwdb.kdbx.simple.SimpleDatabase;
 
 import javax.swing.*;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.util.LinkedList;
 import java.util.List;
@@ -103,7 +100,11 @@ public class ApplicationModel {
                 onDatabaseOpen.forEach(l -> SwingUtilities.invokeLater(() -> l.accept(keepassDB)));
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            StringWriter str = new StringWriter();
+            str.append("Error opening database.\n").append(ex.getMessage());
+            SwingUtilities.invokeLater(() -> {
+                JOptionPane.showMessageDialog(KeepassToolGui.gui, str.toString());
+            });
         }
     }
 

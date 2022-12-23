@@ -4,20 +4,18 @@ import org.linguafranca.pwdb.Entry;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 
 public class KeepassToolGui extends JFrame {
     public static KeepassToolGui gui;
+    private final OpenFileAction openFileAction;
 
     public KeepassToolGui() {
         ApplicationModel model = ApplicationModel.getInstance();
         JPanel content = new JPanel(new BorderLayout());
         setContentPane(content);
 
-        Action openFileAction = new OpenFileAction(content);
+        openFileAction = new OpenFileAction(content);
         EntrySelectionAction copyUserNameToClipboard = new EntrySelectionAction("Copy username", Entry::getUsername);
         model.addSelectedEntryListener(copyUserNameToClipboard::setEntry);
         EntrySelectionAction copyPasswordToClipboard = new EntrySelectionAction("Copy password", Entry::getPassword);
@@ -75,6 +73,11 @@ public class KeepassToolGui extends JFrame {
             gui.setSize(1024, 768);
             gui.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             gui.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowOpened(WindowEvent e) {
+                    gui.openFileAction.actionPerformed(new ActionEvent(gui, 0, null));
+                }
+
                 @Override
                 public void windowClosing(WindowEvent e) {
                     model.saveSettings();
