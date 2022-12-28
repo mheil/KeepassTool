@@ -17,3 +17,8 @@ So, as Java-Developer I decided to write a small tool to let me access my previo
 created keepass-Database again and to make (my) life more easy and more safe again.
 I chose to use Swing, cause Swing is available on most Systems where Java-Development
 happens, although you might think that Swing itself is a little anachronistic these days.
+
+## Screenshots
+
+![Open database dialog](doc/OpenFile.png)
+![Main Screen after opening database](doc/MainScreen.png)
