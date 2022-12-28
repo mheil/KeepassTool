@@ -18,6 +18,7 @@ public class OpenDatabaseDialog extends JDialog {
     private final ApplicationModel model = ApplicationModel.getInstance();
     private final JTextField databaseFile;
     private final JPasswordField passwordField;
+    private final JComboBox<String> typeChooser;
 
     public OpenDatabaseDialog(final JComponent parent) {
         super((JFrame) SwingUtilities.getRoot(parent), "Open Keepass database file", true);
@@ -56,6 +57,23 @@ public class OpenDatabaseDialog extends JDialog {
         gc.gridwidth = 2;
         passwordField = new JPasswordField(20);
         add(passwordField, gc);
+
+        gc.gridx = 0;
+        gc.gridy++;
+        gc.weightx = 0.0;
+        gc.gridwidth = 1;
+        gc.fill = GridBagConstraints.NONE;
+        gc.anchor = GridBagConstraints.EAST;
+        add(new JLabel("Type:"), gc);
+
+        gc.gridx++;
+        gc.weightx = 1.0;
+        gc.fill = GridBagConstraints.HORIZONTAL;
+        gc.gridwidth = 2;
+        typeChooser = new JComboBox<>(new String[]{"Dom", "Simple", "JaxB"});
+        typeChooser.setSelectedItem(model.get(ApplicationModel.Settting.DB_TYPE, "Dom"));
+        typeChooser.addItemListener(e -> model.set(ApplicationModel.Settting.DB_TYPE, (String) typeChooser.getSelectedItem()));
+        add(typeChooser, gc);
 
         gc.gridx = 0;
         gc.gridy++;
@@ -136,12 +154,13 @@ public class OpenDatabaseDialog extends JDialog {
     private void openFile() {
         File dbFile = new File(databaseFile.getText());
         char[] password = passwordField.getPassword();
+        String dbType = (String) typeChooser.getSelectedItem();
         byte[] passwordBytes = new byte[password.length];
         for (int i = 0; i < password.length; i++) {
             passwordBytes[i] = (byte) password[i];
         }
 
-        new Thread(() -> model.openKeepassFile(dbFile, passwordBytes)).start();
+        new Thread(() -> model.openKeepassFile(dbFile, dbType, passwordBytes)).start();
         dispose();
     }
 }

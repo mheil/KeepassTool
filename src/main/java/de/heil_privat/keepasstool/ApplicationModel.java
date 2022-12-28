@@ -2,7 +2,10 @@ package de.heil_privat.keepasstool;
 
 import org.linguafranca.pwdb.Database;
 import org.linguafranca.pwdb.Entry;
+import org.linguafranca.pwdb.kdb.KdbDatabase;
 import org.linguafranca.pwdb.kdbx.KdbxCreds;
+import org.linguafranca.pwdb.kdbx.dom.DomDatabaseWrapper;
+import org.linguafranca.pwdb.kdbx.jaxb.JaxbDatabase;
 import org.linguafranca.pwdb.kdbx.simple.SimpleDatabase;
 
 import javax.swing.*;
@@ -91,24 +94,37 @@ public class ApplicationModel {
         }
     }
 
-    public void openKeepassFile(final File f, byte[] credentialData) {
+    public void openKeepassFile(final File f, String dbImplType, byte[] credentialData) {
         try {
             KdbxCreds creds = new KdbxCreds(credentialData);
             try (InputStream dbFile = Files.newInputStream(f.toPath())) {
-                keepassDB = SimpleDatabase.load(creds, dbFile);
+                switch (dbImplType) {
+                    case "Simple":
+                        keepassDB = SimpleDatabase.load(creds, dbFile);
+                        break;
+                    case "Dom":
+                        keepassDB = DomDatabaseWrapper.load(creds, dbFile);
+                        break;
+                    case "JaxB":
+                        keepassDB = JaxbDatabase.load(creds, dbFile);
+                        break;
+                    default:
+                        throw new IllegalStateException("Illegal Database type '" + dbImplType + " selected");
+                }
+
                 System.out.println("Loaded keepassDB from " + f);
                 onDatabaseOpen.forEach(l -> SwingUtilities.invokeLater(() -> l.accept(keepassDB)));
             }
         } catch (Exception ex) {
             StringWriter str = new StringWriter();
             str.append("Error opening database.\n").append(ex.getMessage());
-            SwingUtilities.invokeLater(() -> {
-                JOptionPane.showMessageDialog(KeepassToolGui.gui, str.toString());
-            });
+            SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(KeepassToolGui.gui, str.toString()));
+            ex.printStackTrace();
         }
     }
 
     public enum Settting {
-        LAST_KEEPASSFILE
+        LAST_KEEPASSFILE,
+        DB_TYPE
     }
 }
