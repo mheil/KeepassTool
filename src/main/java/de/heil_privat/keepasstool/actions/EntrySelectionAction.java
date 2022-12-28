@@ -1,4 +1,4 @@
-package de.heil_privat.keepasstool;
+package de.heil_privat.keepasstool.actions;
 
 import org.linguafranca.pwdb.Entry;
 
@@ -12,8 +12,8 @@ public class EntrySelectionAction extends AbstractAction {
     private final Function<Entry<?, ?, ?, ?>, String> clipBoardValueExtractor;
     private Entry<?, ?, ?, ?> entry;
 
-    public EntrySelectionAction(String name, Function<Entry<?, ?, ?, ?>, String> clipBoardValueExtractor) {
-        super(name);
+    public EntrySelectionAction(String name, Icon icon, Function<Entry<?, ?, ?, ?>, String> clipBoardValueExtractor) {
+        super(name, icon);
         this.clipBoardValueExtractor = clipBoardValueExtractor;
         setEnabled(false);
     }

@@ -1,5 +1,9 @@
 package de.heil_privat.keepasstool;
 
+import com.famfamfam.silk.SilkIcons;
+import de.heil_privat.keepasstool.actions.EntrySelectionAction;
+import de.heil_privat.keepasstool.actions.OpenAboutDialogAction;
+import de.heil_privat.keepasstool.actions.OpenFileAction;
 import org.linguafranca.pwdb.Entry;
 
 import javax.swing.*;
@@ -11,16 +15,18 @@ public class KeepassToolGui extends JFrame {
     private final OpenFileAction openFileAction;
 
     public KeepassToolGui() {
+        setTitle("KeepassTool");
         ApplicationModel model = ApplicationModel.getInstance();
         JPanel content = new JPanel(new BorderLayout());
         setContentPane(content);
 
         openFileAction = new OpenFileAction(content);
-        EntrySelectionAction copyUserNameToClipboard = new EntrySelectionAction("Copy username", Entry::getUsername);
+        EntrySelectionAction copyUserNameToClipboard = new EntrySelectionAction("Copy username",
+                SilkIcons.ICON_USER, Entry::getUsername);
         model.addSelectedEntryListener(copyUserNameToClipboard::setEntry);
-        EntrySelectionAction copyPasswordToClipboard = new EntrySelectionAction("Copy password", Entry::getPassword);
+        EntrySelectionAction copyPasswordToClipboard = new EntrySelectionAction("Copy password", SilkIcons.ICON_KEY, Entry::getPassword);
         model.addSelectedEntryListener(copyPasswordToClipboard::setEntry);
-        EntrySelectionAction copyUrlToClipboard = new EntrySelectionAction("Copy url", Entry::getUrl);
+        EntrySelectionAction copyUrlToClipboard = new EntrySelectionAction("Copy url", SilkIcons.ICON_WORLD_LINK, Entry::getUrl);
         model.addSelectedEntryListener(copyUrlToClipboard::setEntry);
 
         JMenuBar menubar = new JMenuBar();
@@ -35,6 +41,10 @@ public class KeepassToolGui extends JFrame {
         editMenu.add(new JMenuItem(copyPasswordToClipboard));
         editMenu.add(new JMenuItem(copyUrlToClipboard));
         menubar.add(editMenu);
+
+        JMenu helpMenu = new JMenu("Help");
+        helpMenu.add(new JMenuItem(new OpenAboutDialogAction(this)));
+        menubar.add(helpMenu);
 
         JToolBar toolbar = new JToolBar();
         toolbar.add(new JButton(openFileAction));

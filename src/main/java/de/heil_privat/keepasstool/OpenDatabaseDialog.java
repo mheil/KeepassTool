@@ -1,5 +1,7 @@
 package de.heil_privat.keepasstool;
 
+import com.famfamfam.silk.SilkIcons;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
@@ -40,7 +42,7 @@ public class OpenDatabaseDialog extends JDialog {
         gc.gridx++;
         gc.weightx = 0.0;
         gc.fill = GridBagConstraints.NONE;
-        JButton selectFile = new JButton("Open");
+        JButton selectFile = new JButton(SilkIcons.ICON_FOLDER);
         selectFile.addActionListener(e -> selectFile());
         add(selectFile, gc);
 
@@ -83,7 +85,7 @@ public class OpenDatabaseDialog extends JDialog {
         Stream.of(databaseFile, selectFile, passwordField, ok).forEach(c -> c.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
-                switch(e.getKeyChar()) {
+                switch (e.getKeyChar()) {
                     case KeyEvent.VK_ENTER:
                         openFile();
                         break;
@@ -97,7 +99,7 @@ public class OpenDatabaseDialog extends JDialog {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowOpened(WindowEvent e) {
-                if(databaseFile.getText().isEmpty()) {
+                if (databaseFile.getText().isEmpty()) {
                     databaseFile.requestFocusInWindow();
                 } else {
                     passwordField.requestFocusInWindow();
