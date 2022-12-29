@@ -10,11 +10,14 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
+import java.util.LinkedList;
 import java.util.Stack;
+import java.util.function.Consumer;
 
 public class DatabaseTreeView extends JPanel {
     private final ApplicationModel model = ApplicationModel.getInstance();
     private final JTree tree;
+    private final java.util.List<Consumer<Group<?, ?, ?, ?>>> groupSelectionListeners = new LinkedList<>();
 
     public DatabaseTreeView() {
         setMinimumSize(new Dimension(200, 100));
@@ -23,6 +26,10 @@ public class DatabaseTreeView extends JPanel {
         tree = new JTree(new DefaultMutableTreeNode());
         add(new JScrollPane(tree), BorderLayout.CENTER);
         tree.addTreeSelectionListener(this::onSelection);
+    }
+
+    public void addGroupSelectionListener(Consumer<Group<?, ?, ?, ?>> groupSelectionListener) {
+        groupSelectionListeners.add(groupSelectionListener);
     }
 
     private void onSelection(TreeSelectionEvent e) {
@@ -38,15 +45,12 @@ public class DatabaseTreeView extends JPanel {
         }
 
         Object userObject = ((DefaultMutableTreeNode) lastSelectedPathComponent).getUserObject();
-        if (!(userObject instanceof EntryWrapper)) {
-            model.setSelectedEntry(null);
-        } else {
-            model.setSelectedEntry(((EntryWrapper) userObject).entry);
+        if (userObject instanceof GroupWrapper) {
+            groupSelectionListeners.forEach(l -> l.accept(((GroupWrapper) userObject).group));
         }
     }
 
     public void setDatabase(Database<?, ?, ?, ?> database) {
-        System.out.println("Create TreeModel for " + database);
         DefaultMutableTreeNode root = new DefaultMutableTreeNode();
         root.setUserObject(database);
         Stack<DefaultMutableTreeNode> parents = new Stack<>();
@@ -67,9 +71,7 @@ public class DatabaseTreeView extends JPanel {
 
             @Override
             public void visit(Entry entry) {
-                DefaultMutableTreeNode treeNode = new DefaultMutableTreeNode(new EntryWrapper(entry));
-                treeNode.setAllowsChildren(false);
-                parents.peek().add(treeNode);
+                //we don't display entries in tree view
             }
 
             @Override
@@ -92,19 +94,6 @@ public class DatabaseTreeView extends JPanel {
         @Override
         public String toString() {
             return group.getName();
-        }
-    }
-
-    private static class EntryWrapper {
-        final Entry<?, ?, ?, ?> entry;
-
-        private EntryWrapper(Entry<?, ?, ?, ?> entry) {
-            this.entry = entry;
-        }
-
-        @Override
-        public String toString() {
-            return entry.getTitle();
         }
     }
 }

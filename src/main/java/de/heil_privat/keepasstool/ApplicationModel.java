@@ -2,7 +2,6 @@ package de.heil_privat.keepasstool;
 
 import org.linguafranca.pwdb.Database;
 import org.linguafranca.pwdb.Entry;
-import org.linguafranca.pwdb.kdb.KdbDatabase;
 import org.linguafranca.pwdb.kdbx.KdbxCreds;
 import org.linguafranca.pwdb.kdbx.dom.DomDatabaseWrapper;
 import org.linguafranca.pwdb.kdbx.jaxb.JaxbDatabase;
@@ -55,7 +54,11 @@ public class ApplicationModel {
     }
 
     public void set(ApplicationModel.Settting name, String value) {
-        settings.setProperty(name.name(), value);
+        if (value == null) {
+            settings.remove(name.name());
+        } else {
+            settings.setProperty(name.name(), value);
+        }
         dirty = true;
     }
 
@@ -63,10 +66,26 @@ public class ApplicationModel {
         return settings.getProperty(setting.name(), defaultValue);
     }
 
+    public <E extends Enum<E>> void set(ApplicationModel.Settting settting, E value) {
+        set(settting, value == null ? null : value.name());
+    }
+
+    public <E extends Enum<E>> E get(ApplicationModel.Settting setting, E defaultValue) {
+        String s = settings.getProperty(setting.name(), null);
+        if (s == null) {
+            return defaultValue;
+        }
+
+        try {
+            return Enum.valueOf(defaultValue.getDeclaringClass(), s);
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
+    }
+
     private void loadSettings() {
         synchronized (this) {
             if (!SETTINGS_FILE.exists()) {
-                System.out.println("No settings file to load");
                 return;
             }
             try (InputStream in = Files.newInputStream(SETTINGS_FILE.toPath())) {
@@ -83,7 +102,6 @@ public class ApplicationModel {
                 return;
             }
 
-            System.out.println("Saving settings to " + SETTINGS_FILE);
             try (OutputStream out = Files.newOutputStream(SETTINGS_FILE.toPath())) {
                 settings.store(out, null);
             } catch (IOException e) {
@@ -94,25 +112,24 @@ public class ApplicationModel {
         }
     }
 
-    public void openKeepassFile(final File f, String dbImplType, byte[] credentialData) {
+    public void openKeepassFile(final File f, DbImplementation dbImplType, byte[] credentialData) {
         try {
             KdbxCreds creds = new KdbxCreds(credentialData);
             try (InputStream dbFile = Files.newInputStream(f.toPath())) {
                 switch (dbImplType) {
-                    case "Simple":
+                    case Simple:
                         keepassDB = SimpleDatabase.load(creds, dbFile);
                         break;
-                    case "Dom":
+                    case Dom:
                         keepassDB = DomDatabaseWrapper.load(creds, dbFile);
                         break;
-                    case "JaxB":
+                    case JaxB:
                         keepassDB = JaxbDatabase.load(creds, dbFile);
                         break;
                     default:
                         throw new IllegalStateException("Illegal Database type '" + dbImplType + " selected");
                 }
 
-                System.out.println("Loaded keepassDB from " + f);
                 onDatabaseOpen.forEach(l -> SwingUtilities.invokeLater(() -> l.accept(keepassDB)));
             }
         } catch (Exception ex) {

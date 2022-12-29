@@ -65,10 +65,12 @@ public class KeepassToolGui extends JFrame {
 
         KeepassEntryTable entryTable = new KeepassEntryTable();
 
+        databaseTreeView.addGroupSelectionListener(entryTable::setGroup);
+
         textField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
-                entryTable.setFilter(textField.getText());
+                SwingUtilities.invokeLater(() -> entryTable.setFilter(textField.getText()));
             }
         });
         split.add(entryTable);

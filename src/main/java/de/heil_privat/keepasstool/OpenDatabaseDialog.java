@@ -18,7 +18,7 @@ public class OpenDatabaseDialog extends JDialog {
     private final ApplicationModel model = ApplicationModel.getInstance();
     private final JTextField databaseFile;
     private final JPasswordField passwordField;
-    private final JComboBox<String> typeChooser;
+    private final JComboBox<DbImplementation> typeChooser;
 
     public OpenDatabaseDialog(final JComponent parent) {
         super((JFrame) SwingUtilities.getRoot(parent), "Open Keepass database file", true);
@@ -70,9 +70,9 @@ public class OpenDatabaseDialog extends JDialog {
         gc.weightx = 1.0;
         gc.fill = GridBagConstraints.HORIZONTAL;
         gc.gridwidth = 2;
-        typeChooser = new JComboBox<>(new String[]{"Dom", "Simple", "JaxB"});
-        typeChooser.setSelectedItem(model.get(ApplicationModel.Settting.DB_TYPE, "Dom"));
-        typeChooser.addItemListener(e -> model.set(ApplicationModel.Settting.DB_TYPE, (String) typeChooser.getSelectedItem()));
+        typeChooser = new JComboBox<>(DbImplementation.values());
+        typeChooser.setSelectedItem(model.get(ApplicationModel.Settting.DB_TYPE, DbImplementation.JaxB));
+        typeChooser.addItemListener(e -> model.set(ApplicationModel.Settting.DB_TYPE, (DbImplementation) typeChooser.getSelectedItem()));
         add(typeChooser, gc);
 
         gc.gridx = 0;
@@ -154,7 +154,7 @@ public class OpenDatabaseDialog extends JDialog {
     private void openFile() {
         File dbFile = new File(databaseFile.getText());
         char[] password = passwordField.getPassword();
-        String dbType = (String) typeChooser.getSelectedItem();
+        DbImplementation dbType = (DbImplementation) typeChooser.getSelectedItem();
         byte[] passwordBytes = new byte[password.length];
         for (int i = 0; i < password.length; i++) {
             passwordBytes[i] = (byte) password[i];
